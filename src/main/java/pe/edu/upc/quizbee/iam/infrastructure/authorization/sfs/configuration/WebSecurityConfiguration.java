@@ -88,6 +88,8 @@ public class WebSecurityConfiguration {
      * @param http The http security
      * @return The security filter chain
      */
+
+   /** es para que no pida authentification
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(corsConfigurer -> corsConfigurer.configurationSource( request -> {
@@ -112,6 +114,23 @@ public class WebSecurityConfiguration {
         return http.build();
     }
 
+     */
+
+   @Bean
+   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+       http.cors(corsConfigurer -> corsConfigurer.configurationSource( request -> {
+           var cors = new CorsConfiguration();
+           cors.setAllowedOrigins(List.of("*"));
+           cors.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
+           cors.setAllowedHeaders(List.of("*"));
+           return cors;
+       } ));
+       http.csrf(csrfConfigurer -> csrfConfigurer.disable())
+               .authorizeHttpRequests(authorizeRequests ->
+                       authorizeRequests.anyRequest().permitAll()  // ⚠️ PERMITE TODO
+               );
+       return http.build();
+   }
     /**
      * This is the constructor of the class.
      * @param userDetailsService The user details service
@@ -119,6 +138,9 @@ public class WebSecurityConfiguration {
      * @param hashingService The hashing service
      * @param authenticationEntryPoint The authentication entry point
      */
+
+
+
     public WebSecurityConfiguration(
             @Qualifier("defaultUserDetailsService") UserDetailsService userDetailsService,
             BearerTokenService tokenService, BCryptHashingService hashingService,
