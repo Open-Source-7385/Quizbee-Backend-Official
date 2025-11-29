@@ -1,5 +1,10 @@
 package dominio.startup.quizbee.quiz_bee_platform.profiles.interfaces.rest;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -43,6 +48,12 @@ public class ProfilesController {
      * @param resource the resource containing the data to create the Profile
      * @return the created Profile
      */
+    @Operation(summary = "Create new profile", description = "Creates a new user profile with personal information")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Profile created successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProfileResource.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid input")
+    })
     @PostMapping
     public ResponseEntity<ProfileResource> createProfile(
             @RequestBody CreateProfileResource resource) {
@@ -61,6 +72,12 @@ public class ProfilesController {
      * @param profileId the id of the Profile to get
      * @return the Profile resource associated to given Profile id
      */
+    @Operation(summary = "Get profile by ID", description = "Returns a profile by its unique identifier")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Profile found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProfileResource.class))),
+        @ApiResponse(responseCode = "400", description = "Profile not found")
+    })
     @GetMapping("/{profileId}")
     public ResponseEntity<ProfileResource> getProfileById(@PathVariable Long profileId) {
         var getProfileByIdQuery = new GetProfileByIdQuery(profileId);
@@ -75,6 +92,11 @@ public class ProfilesController {
      * Gets all the Profiles
      * @return a list of all the Profile resources currently stored
      */
+    @Operation(summary = "Get all profiles", description = "Returns a list of all profiles")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProfileResource.class)))
+    })
     @GetMapping
     public ResponseEntity<List<ProfileResource>> getAllProfiles() {
         var getAllProfilesQuery = new GetAllProfilesQuery();

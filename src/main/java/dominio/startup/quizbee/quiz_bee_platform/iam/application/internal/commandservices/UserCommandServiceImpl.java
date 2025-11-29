@@ -7,6 +7,10 @@ import dominio.startup.quizbee.quiz_bee_platform.iam.application.internal.outbou
 import dominio.startup.quizbee.quiz_bee_platform.iam.domain.model.aggregates.User;
 import dominio.startup.quizbee.quiz_bee_platform.iam.domain.model.commands.SignInCommand;
 import dominio.startup.quizbee.quiz_bee_platform.iam.domain.model.commands.SignUpCommand;
+import dominio.startup.quizbee.quiz_bee_platform.iam.domain.model.commands.UpdateUserCommand;
+import dominio.startup.quizbee.quiz_bee_platform.iam.domain.model.commands.UpdateUserStatsCommand;
+import dominio.startup.quizbee.quiz_bee_platform.iam.domain.model.commands.UpdateUserSubscriptionCommand;
+import dominio.startup.quizbee.quiz_bee_platform.iam.domain.model.commands.DeleteUserCommand;
 import dominio.startup.quizbee.quiz_bee_platform.iam.domain.services.UserCommandService;
 import dominio.startup.quizbee.quiz_bee_platform.iam.infrastructure.persistence.jpa.repositories.RoleRepository;
 import dominio.startup.quizbee.quiz_bee_platform.iam.infrastructure.persistence.jpa.repositories.UserRepository;
@@ -76,8 +80,90 @@ public class UserCommandServiceImpl implements UserCommandService {
                         roleRepository.findByName(role.getName())
                                 .orElseThrow(() -> new RuntimeException("Role name not found")))
                 .toList();
-        var user = new User(command.username(), hashingService.encode(command.password()), roles);
+        var user = new User(command.username(), command.email(), hashingService.encode(command.password()), roles);
         userRepository.save(user);
         return userRepository.findByUsername(command.username());
+    }
+
+    /**
+     * Handle the update user command
+     * <p>
+     *     This method handles the {@link UpdateUserCommand} command and returns the updated user.
+     * </p>
+     * @param command the update user command
+     * @return the updated user
+     */
+    @Override
+    @SuppressWarnings("null")
+    public Optional<User> handle(UpdateUserCommand command) {
+        var user = userRepository.findById(command.userId());
+        if (user.isEmpty())
+            throw new RuntimeException("User not found");
+        
+        user.get().updateProfile(
+                command.displayName(),
+                command.bio(),
+                command.avatar(),
+                command.country(),
+                command.language()
+        );
+        
+        userRepository.save(user.get());
+        return user;
+    }
+
+    /**
+     * Handle the update user stats command
+     * <p>
+     *     This method handles the {@link UpdateUserStatsCommand} command and returns the updated user.
+     * </p>
+     * @param command the update user stats command
+     * @return the updated user
+     */
+    @Override
+    @SuppressWarnings("null")
+    public Optional<User> handle(UpdateUserStatsCommand command) {
+        var user = userRepository.findById(command.userId());
+        if (user.isEmpty())
+            throw new RuntimeException("User not found");
+        
+        user.get().updateStats(command.stats());
+        userRepository.save(user.get());
+        return user;
+    }
+
+    /**
+     * Handle the update user subscription command
+     * <p>
+     *     This method handles the {@link UpdateUserSubscriptionCommand} command and returns the updated user.
+     * </p>
+     * @param command the update user subscription command
+     * @return the updated user
+     */
+    @Override
+    @SuppressWarnings("null")
+    public Optional<User> handle(UpdateUserSubscriptionCommand command) {
+        var user = userRepository.findById(command.userId());
+        if (user.isEmpty())
+            throw new RuntimeException("User not found");
+        
+        user.get().updateSubscription(command.status(), command.expiry());
+        userRepository.save(user.get());
+        return user;
+    }
+
+    /**
+     * Handle the delete user command
+     * <p>
+     *     This method handles the {@link DeleteUserCommand} command and deletes the user.
+     * </p>
+     * @param command the delete user command
+     */
+    @Override
+    @SuppressWarnings("null")
+    public void handle(DeleteUserCommand command) {
+        if (!userRepository.existsById(command.userId()))
+            throw new RuntimeException("User not found");
+        userRepository.deleteById(command.userId());
     }
 }

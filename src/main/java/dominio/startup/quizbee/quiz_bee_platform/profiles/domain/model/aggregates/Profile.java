@@ -10,6 +10,9 @@ import dominio.startup.quizbee.quiz_bee_platform.shared.domain.model.aggregates.
 @Entity
 public class Profile extends AuditableAbstractAggregateRoot<Profile> {
 
+    @Column(nullable = true)
+    private Long userId; // Foreign key to User in IAM context
+
     @Embedded
     private PersonName name;
 
@@ -31,15 +34,23 @@ public class Profile extends AuditableAbstractAggregateRoot<Profile> {
         this.name = new PersonName(firstName, lastName);
         this.email = new EmailAddress(email);
         this.address = new StreetAddress(street, number, city, postalCode, country);
+        this.userId = null;
     }
 
     public Profile(CreateProfileCommand command) {
         this.name = new PersonName(command.firstName(), command.lastName());
         this.email = new EmailAddress(command.email());
         this.address = new StreetAddress(command.street(), command.number(), command.city(), command.postalCode(), command.country());
+        this.userId = null;
+    }
+
+    public Profile(Long userId, String firstName, String lastName, String email, String street, String number, String city, String postalCode, String country) {
+        this(firstName, lastName, email, street, number, city, postalCode, country);
+        this.userId = userId;
     }
 
     public Profile() {
+        this.userId = null;
     }
 
     public void updateName(String firstName, String lastName) {
@@ -64,5 +75,13 @@ public class Profile extends AuditableAbstractAggregateRoot<Profile> {
 
     public String getStreetAddress() {
         return address.getStreetAddress();
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

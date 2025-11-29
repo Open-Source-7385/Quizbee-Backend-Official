@@ -5,7 +5,14 @@ import dominio.startup.quizbee.quiz_bee_platform.profiles.interfaces.rest.resour
 
 public class ProfileResourceFromEntityAssembler {
     public static ProfileResource toResourceFromEntity(Profile entity) {
-        return new ProfileResource(entity.getId(), entity.getEmailAddress(),
-                entity.getFullName(), entity.getStreetAddress());
+        return new ProfileResource(
+                entity.getId(),
+                entity.getUserId(),
+                entity.getFullName(),
+                entity.getEmailAddress(),
+                entity.getStreetAddress(),
+                entity.getCreatedAt(),
+                entity.getUpdatedAt()
+        );
     }
 }
