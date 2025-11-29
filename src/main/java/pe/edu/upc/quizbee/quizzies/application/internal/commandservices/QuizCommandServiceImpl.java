@@ -129,6 +129,54 @@ public class QuizCommandServiceImpl implements QuizCommandService {
         quizRepository.save(quiz);
         return Optional.of(quiz);
     }
+    @Override
+    @Transactional
+    public Optional<Quiz> handle(UpdateQuizQuestionsCommand command) {
+        var quiz = quizRepository.findById(command.quizId())
+                .orElseThrow(() -> new IllegalArgumentException("Quiz not found with id: " + command.quizId()));
 
-    
+        // Update title if provided
+        if (command.title() != null && !command.title().isBlank()) {
+            quiz.setTitle(command.title());
+        }
+
+        // Update questions if provided
+        if (command.questions() != null && !command.questions().isEmpty()) {
+            // Remove all existing questions
+            var questionsToRemove = new java.util.ArrayList<>(quiz.getQuestions());
+            for (var question : questionsToRemove) {
+                quiz.removeQuestion(question);
+            }
+
+            // Add updated questions
+            for (var questionData : command.questions()) {
+                var question = new pe.edu.upc.quizbee.quizzies.domain.model.entities.Question(
+                        questionData.textQuestion(),
+                        questionData.orderNumber(),
+                        questionData.points()
+                );
+
+                // Add alternatives
+                if (questionData.alternatives() != null) {
+                    for (var altData : questionData.alternatives()) {
+                        var alternative = new pe.edu.upc.quizbee.quizzies.domain.model.entities.Alternative(
+                                altData.text(),
+                                altData.isCorrect()
+                        );
+                        question.addAlternative(alternative);
+                    }
+                }
+
+                quiz.addQuestion(question);
+            }
+        }
+
+        // Validate quiz
+        if (!quiz.isValid()) {
+            throw new IllegalArgumentException("Quiz is not valid. Ensure all questions have correct answers.");
+        }
+
+        quizRepository.save(quiz);
+        return Optional.of(quiz);
+    }
 }

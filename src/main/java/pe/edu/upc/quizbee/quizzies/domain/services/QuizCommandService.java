@@ -9,6 +9,7 @@ import java.util.Optional;
 public interface QuizCommandService {
     Optional<Quiz> handle(CreateQuizCommand command);
     Optional<Quiz> handle(UpdateQuizCommand command);
+    Optional<Quiz> handle(UpdateQuizQuestionsCommand command);
     void handle(DeleteQuizCommand command);
     Optional<Quiz> handle(IncrementQuizPlaysCommand command);
 }

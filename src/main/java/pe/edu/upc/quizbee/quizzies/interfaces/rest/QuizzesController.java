@@ -20,6 +20,9 @@ import pe.edu.upc.quizbee.quizzies.interfaces.rest.resources.UpdateQuizResource;
 import pe.edu.upc.quizbee.quizzies.interfaces.rest.transform.CreateQuizCommandFromResourceAssembler;
 import pe.edu.upc.quizbee.quizzies.interfaces.rest.transform.QuizResourceFromEntityAssembler;
 import pe.edu.upc.quizbee.quizzies.interfaces.rest.transform.UpdateQuizCommandFromResourceAssembler;
+import pe.edu.upc.quizbee.quizzies.domain.model.commands.UpdateQuizQuestionsCommand;
+import pe.edu.upc.quizbee.quizzies.interfaces.rest.resources.UpdateQuizQuestionsResource;
+import pe.edu.upc.quizbee.quizzies.interfaces.rest.transform.UpdateQuizQuestionsCommandFromResourceAssembler;
 
 import java.util.List;
 
@@ -124,6 +127,37 @@ public class QuizzesController {
             @RequestBody UpdateQuizResource resource) {
 
         var updateCommand = UpdateQuizCommandFromResourceAssembler.toCommandFromResource(quizId, resource);
+        var quiz = quizCommandService.handle(updateCommand);
+
+        if (quiz.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        var quizResource = QuizResourceFromEntityAssembler.toResourceFromEntity(quiz.get());
+        return ResponseEntity.ok(quizResource);
+    }
+
+    // MÉTODO A AGREGAR:
+    /**
+     * Update quiz questions and title only
+     * @param quizId the quiz ID
+     * @param resource the quiz questions update data
+     * @return the updated quiz
+     */
+    @Operation(summary = "Update quiz questions and title",
+            description = "Updates only the title and questions of a quiz, preserving metadata")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Quiz questions updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid quiz data"),
+            @ApiResponse(responseCode = "404", description = "Quiz not found")
+    })
+    @PatchMapping("/{quizId}/questions")
+    public ResponseEntity<QuizResource> updateQuizQuestions(
+            @PathVariable Long quizId,
+            @RequestBody UpdateQuizQuestionsResource resource) {
+
+        var updateCommand = UpdateQuizQuestionsCommandFromResourceAssembler
+                .toCommandFromResource(quizId, resource);
         var quiz = quizCommandService.handle(updateCommand);
 
         if (quiz.isEmpty()) {
@@ -276,4 +310,5 @@ public class QuizzesController {
                 .toList();
         return ResponseEntity.ok(quizResources);
     }
+
 }
