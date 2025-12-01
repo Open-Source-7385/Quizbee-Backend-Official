@@ -1,12 +1,12 @@
 package pe.edu.upc.quizbee.iam.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import pe.edu.upc.quizbee.iam.domain.model.aggregates.User;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import pe.edu.upc.quizbee.iam.domain.model.aggregates.User;
 
 import java.util.Collection;
 import java.util.stream.Collectors;

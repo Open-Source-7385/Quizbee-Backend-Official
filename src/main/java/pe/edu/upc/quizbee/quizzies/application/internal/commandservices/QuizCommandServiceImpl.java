@@ -150,7 +150,7 @@ public class QuizCommandServiceImpl implements QuizCommandService {
 
             // Add updated questions
             for (var questionData : command.questions()) {
-                var question = new pe.edu.upc.quizbee.quizzies.domain.model.entities.Question(
+                var question = new Question(
                         questionData.textQuestion(),
                         questionData.orderNumber(),
                         questionData.points()
@@ -159,7 +159,7 @@ public class QuizCommandServiceImpl implements QuizCommandService {
                 // Add alternatives
                 if (questionData.alternatives() != null) {
                     for (var altData : questionData.alternatives()) {
-                        var alternative = new pe.edu.upc.quizbee.quizzies.domain.model.entities.Alternative(
+                        var alternative = new Alternative(
                                 altData.text(),
                                 altData.isCorrect()
                         );

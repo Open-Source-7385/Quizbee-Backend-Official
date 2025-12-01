@@ -1,8 +1,8 @@
 package pe.edu.upc.quizbee.iam.infrastructure.hashing.bcrypt;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
 import pe.edu.upc.quizbee.iam.application.internal.outboundservices.hashing.HashingService;
 import pe.edu.upc.quizbee.iam.infrastructure.hashing.bcrypt.services.HashingServiceImpl;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * This interface is a marker interface for the BCrypt hashing service.

@@ -1,12 +1,12 @@
 package pe.edu.upc.quizbee.iam.application.internal.eventhandlers;
 
+import pe.edu.upc.quizbee.iam.domain.model.commands.SeedRolesCommand;
+import pe.edu.upc.quizbee.iam.domain.services.RoleCommandService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
-import pe.edu.upc.quizbee.iam.domain.model.commands.SeedRolesCommand;
-import pe.edu.upc.quizbee.iam.domain.services.RoleCommandService;
 
 import java.sql.Timestamp;
 

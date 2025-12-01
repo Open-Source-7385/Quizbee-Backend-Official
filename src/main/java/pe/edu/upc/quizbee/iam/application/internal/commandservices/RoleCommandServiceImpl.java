@@ -1,11 +1,11 @@
 package pe.edu.upc.quizbee.iam.application.internal.commandservices;
 
-import org.springframework.stereotype.Service;
 import pe.edu.upc.quizbee.iam.domain.model.commands.SeedRolesCommand;
 import pe.edu.upc.quizbee.iam.domain.model.entities.Role;
 import pe.edu.upc.quizbee.iam.domain.model.valueobjects.Roles;
 import pe.edu.upc.quizbee.iam.domain.services.RoleCommandService;
 import pe.edu.upc.quizbee.iam.infrastructure.persistence.jpa.repositories.RoleRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 

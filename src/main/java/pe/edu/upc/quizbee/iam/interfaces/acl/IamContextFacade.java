@@ -1,12 +1,12 @@
 package pe.edu.upc.quizbee.iam.interfaces.acl;
 
-import org.apache.logging.log4j.util.Strings;
 import pe.edu.upc.quizbee.iam.domain.model.commands.SignUpCommand;
 import pe.edu.upc.quizbee.iam.domain.model.entities.Role;
 import pe.edu.upc.quizbee.iam.domain.model.queries.GetUserByIdQuery;
 import pe.edu.upc.quizbee.iam.domain.model.queries.GetUserByUsernameQuery;
 import pe.edu.upc.quizbee.iam.domain.services.UserCommandService;
 import pe.edu.upc.quizbee.iam.domain.services.UserQueryService;
+import org.apache.logging.log4j.util.Strings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ public class IamContextFacade {
      * @return The id of the created user.
      */
     public Long createUser(String username, String password) {
-        var signUpCommand = new SignUpCommand(username, password, List.of(Role.getDefaultRole()));
+        var signUpCommand = new SignUpCommand(username, username + "@example.com", password, List.of(Role.getDefaultRole()));
         var result = userCommandService.handle(signUpCommand);
         if (result.isEmpty()) return 0L;
         return result.get().getId();
@@ -57,7 +57,7 @@ public class IamContextFacade {
         var roles = roleNames != null
                 ? roleNames.stream().map(Role::toRoleFromName).toList()
                 : new ArrayList<Role>();
-        var signUpCommand = new SignUpCommand(username, password, roles);
+        var signUpCommand = new SignUpCommand(username, username + "@example.com", password, roles);
         var result = userCommandService.handle(signUpCommand);
         if (result.isEmpty())
             return 0L;

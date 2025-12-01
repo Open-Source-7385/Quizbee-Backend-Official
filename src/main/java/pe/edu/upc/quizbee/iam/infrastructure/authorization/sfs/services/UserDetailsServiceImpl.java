@@ -1,11 +1,11 @@
 package pe.edu.upc.quizbee.iam.infrastructure.authorization.sfs.services;
 
+import pe.edu.upc.quizbee.iam.infrastructure.authorization.sfs.model.UserDetailsImpl;
+import pe.edu.upc.quizbee.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import pe.edu.upc.quizbee.iam.infrastructure.authorization.sfs.model.UserDetailsImpl;
-import pe.edu.upc.quizbee.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 
 /**
  * This class is responsible for providing the user details to the Spring Security framework.

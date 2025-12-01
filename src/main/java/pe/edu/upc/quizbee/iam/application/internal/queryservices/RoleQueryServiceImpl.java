@@ -1,11 +1,11 @@
 package pe.edu.upc.quizbee.iam.application.internal.queryservices;
 
-import org.springframework.stereotype.Service;
 import pe.edu.upc.quizbee.iam.domain.model.entities.Role;
 import pe.edu.upc.quizbee.iam.domain.model.queries.GetAllRolesQuery;
 import pe.edu.upc.quizbee.iam.domain.model.queries.GetRoleByNameQuery;
 import pe.edu.upc.quizbee.iam.domain.services.RoleQueryService;
 import pe.edu.upc.quizbee.iam.infrastructure.persistence.jpa.repositories.RoleRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,5 +1,6 @@
 package pe.edu.upc.quizbee.iam.infrastructure.tokens.jwt.services;
 
+import pe.edu.upc.quizbee.iam.infrastructure.tokens.jwt.BearerTokenService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import pe.edu.upc.quizbee.iam.infrastructure.tokens.jwt.BearerTokenService;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;

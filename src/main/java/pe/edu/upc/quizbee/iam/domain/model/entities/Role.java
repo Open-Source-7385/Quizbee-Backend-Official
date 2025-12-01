@@ -1,11 +1,11 @@
 package pe.edu.upc.quizbee.iam.domain.model.entities;
 
+import pe.edu.upc.quizbee.iam.domain.model.valueobjects.Roles;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
-import pe.edu.upc.quizbee.iam.domain.model.valueobjects.Roles;
 
 import java.util.List;
 

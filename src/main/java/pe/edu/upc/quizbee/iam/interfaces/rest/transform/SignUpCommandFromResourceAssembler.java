@@ -1,9 +1,10 @@
 package pe.edu.upc.quizbee.iam.interfaces.rest.transform;
 
-import java.util.ArrayList;
 import pe.edu.upc.quizbee.iam.domain.model.commands.SignUpCommand;
 import pe.edu.upc.quizbee.iam.domain.model.entities.Role;
 import pe.edu.upc.quizbee.iam.interfaces.rest.resources.SignUpResource;
+
+import java.util.ArrayList;
 
 public class SignUpCommandFromResourceAssembler {
 
@@ -11,6 +12,6 @@ public class SignUpCommandFromResourceAssembler {
         var roles = resource.roles() != null
                 ? resource.roles().stream().map(name -> Role.toRoleFromName(name)).toList()
                 : new ArrayList<Role>();
-        return new SignUpCommand(resource.username(), resource.password(), roles);
+        return new SignUpCommand(resource.username(), resource.email(), resource.password(), roles);
     }
 }

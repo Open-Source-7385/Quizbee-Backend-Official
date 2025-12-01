@@ -1,24 +1,43 @@
 package pe.edu.upc.quizbee.iam.interfaces.rest;
 
+import pe.edu.upc.quizbee.iam.domain.model.commands.DeleteUserCommand;
+import pe.edu.upc.quizbee.iam.domain.model.commands.UpdateUserStatsCommand;
+import pe.edu.upc.quizbee.iam.domain.model.commands.UpdateUserSubscriptionCommand;
+import pe.edu.upc.quizbee.iam.domain.model.queries.GetAllUsersQuery;
+import pe.edu.upc.quizbee.iam.domain.model.queries.GetUserByEmailAndPasswordQuery;
+import pe.edu.upc.quizbee.iam.domain.model.queries.GetUserByEmailQuery;
+import pe.edu.upc.quizbee.iam.domain.model.queries.GetUserByIdQuery;
+import pe.edu.upc.quizbee.iam.domain.model.valueobjects.SubscriptionStatus;
+import pe.edu.upc.quizbee.iam.domain.model.valueobjects.UserStats;
+import pe.edu.upc.quizbee.iam.domain.services.UserCommandService;
+import pe.edu.upc.quizbee.iam.domain.services.UserQueryService;
+import pe.edu.upc.quizbee.iam.interfaces.rest.resources.PatchUserResource;
+import pe.edu.upc.quizbee.iam.interfaces.rest.resources.UpdateUserResource;
+import pe.edu.upc.quizbee.iam.interfaces.rest.resources.UserResource;
+import pe.edu.upc.quizbee.iam.interfaces.rest.transform.UpdateUserCommandFromResourceAssembler;
+import pe.edu.upc.quizbee.iam.interfaces.rest.transform.UserResourceFromEntityAssembler;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import pe.edu.upc.quizbee.iam.domain.model.queries.GetAllUsersQuery;
-import pe.edu.upc.quizbee.iam.domain.model.queries.GetUserByIdQuery;
-import pe.edu.upc.quizbee.iam.domain.services.UserQueryService;
-import pe.edu.upc.quizbee.iam.interfaces.rest.resources.UserResource;
-import pe.edu.upc.quizbee.iam.interfaces.rest.transform.UserResourceFromEntityAssembler;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * This class is a REST controller that exposes the users resource.
  * It includes the following operations:
  * - GET /api/v1/users: returns all the users
+ * - GET /api/v1/users?email=&password=&rol=: login with query params
  * - GET /api/v1/users/{userId}: returns the user with the given id
+ * - GET /api/v1/users/email/{email}: returns the user with the given email
+ * - PUT /api/v1/users/{userId}: updates user profile
+ * - PATCH /api/v1/users/{userId}: partially updates user (stats, subscription)
+ * - DELETE /api/v1/users/{userId}: deletes a user
  **/
 @RestController
 @RequestMapping(value = "/api/v1/users", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -26,19 +45,58 @@ import pe.edu.upc.quizbee.iam.interfaces.rest.transform.UserResourceFromEntityAs
 public class UsersController {
 
     private final UserQueryService userQueryService;
+    private final UserCommandService userCommandService;
 
-    public UsersController(UserQueryService userQueryService) {
+    public UsersController(UserQueryService userQueryService, UserCommandService userCommandService) {
         this.userQueryService = userQueryService;
+        this.userCommandService = userCommandService;
     }
 
     /**
-     * This method returns all the users.
-     *
-     * @return a list of user resources.
+     * This method returns all the users or performs login if email and password are provided.
+     * 
+     * @param email Optional email for login
+     * @param password Optional password for login
+     * @param rol Optional rol filter
+     * @return a list of user resources or a single user if login credentials match
      * @see UserResource
      */
+    @Operation(summary = "Get all users or login", 
+               description = "Returns all users if no parameters provided. If email and password are provided, validates credentials and returns matching user.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResource.class)))
+    })
     @GetMapping
-    public ResponseEntity<List<UserResource>> getAllUsers() {
+    public ResponseEntity<List<UserResource>> getAllUsersOrLogin(
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String password,
+            @RequestParam(required = false) String rol) {
+        
+        // If email and password are provided, perform login
+        if (email != null && password != null) {
+            var query = new GetUserByEmailAndPasswordQuery(email, password);
+            var user = userQueryService.handle(query);
+            
+            if (user.isEmpty()) {
+                // Return empty list if credentials are invalid (matching frontend expectation)
+                return ResponseEntity.ok(List.of());
+            }
+            
+            // Filter by rol if provided
+            if (rol != null && !rol.isEmpty()) {
+                var hasRole = user.get().getRoles().stream()
+                        .anyMatch(role -> role.getStringName().toLowerCase().contains(rol.toLowerCase()));
+                if (!hasRole) {
+                    return ResponseEntity.ok(List.of());
+                }
+            }
+            
+            var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
+            return ResponseEntity.ok(List.of(userResource));
+        }
+        
+        // Otherwise, return all users
         var getAllUsersQuery = new GetAllUsersQuery();
         var users = userQueryService.handle(getAllUsersQuery);
         var userResources = users.stream()
@@ -55,6 +113,12 @@ public class UsersController {
      * @throws RuntimeException if the user is not found
      * @see UserResource
      */
+    @Operation(summary = "Get user by ID", description = "Returns a user by their unique identifier")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResource.class))),
+        @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @GetMapping(value = "/{userId}")
     public ResponseEntity<UserResource> getUserById(@PathVariable Long userId) {
         var getUserByIdQuery = new GetUserByIdQuery(userId);
@@ -64,5 +128,128 @@ public class UsersController {
         }
         var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
         return ResponseEntity.ok(userResource);
+    }
+
+    /**
+     * This method returns the user with the given email.
+     *
+     * @param email the user email.
+     * @return the user resource with the given email
+     * @see UserResource
+     */
+    @Operation(summary = "Get user by email", description = "Returns a user by their email address")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User found",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResource.class))),
+        @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @GetMapping(value = "/email/{email}")
+    public ResponseEntity<UserResource> getUserByEmail(@PathVariable String email) {
+        var getUserByEmailQuery = new GetUserByEmailQuery(email);
+        var user = userQueryService.handle(getUserByEmailQuery);
+        if (user.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
+        return ResponseEntity.ok(userResource);
+    }
+
+    /**
+     * Updates user profile information
+     *
+     * @param userId the user id
+     * @param resource the update user resource
+     * @return the updated user resource
+     */
+    @Operation(summary = "Update user profile", description = "Updates complete user profile information")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User updated successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResource.class))),
+        @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @PutMapping(value = "/{userId}")
+    public ResponseEntity<UserResource> updateUser(
+            @PathVariable Long userId,
+            @RequestBody UpdateUserResource resource) {
+        
+        var updateUserCommand = UpdateUserCommandFromResourceAssembler.toCommandFromResource(userId, resource);
+        var user = userCommandService.handle(updateUserCommand);
+        
+        if (user.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
+        return ResponseEntity.ok(userResource);
+    }
+
+    /**
+     * Partially updates user (stats, subscription status)
+     *
+     * @param userId the user id
+     * @param resource the patch user resource
+     * @return the updated user resource
+     */
+    @Operation(summary = "Partially update user", description = "Updates user stats and/or subscription status")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User updated successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResource.class))),
+        @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @PatchMapping(value = "/{userId}")
+    public ResponseEntity<UserResource> patchUser(
+            @PathVariable Long userId,
+            @RequestBody PatchUserResource resource) {
+        
+        var user = userQueryService.handle(new GetUserByIdQuery(userId));
+        if (user.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        // Update stats if provided
+        if (resource.stats() != null) {
+            var stats = new UserStats(
+                    resource.stats().lives(),
+                    resource.stats().points(),
+                    resource.stats().quizzesPlayed(),
+                    resource.stats().quizzesWon(),
+                    resource.stats().quizzesLost(),
+                    resource.stats().currentStreak()
+            );
+            var updateStatsCommand = new UpdateUserStatsCommand(userId, stats);
+            user = userCommandService.handle(updateStatsCommand);
+        }
+        
+        // Update subscription if provided
+        if (resource.subscriptionStatus() != null) {
+            var status = SubscriptionStatus.valueOf(resource.subscriptionStatus().toUpperCase());
+            var updateSubscriptionCommand = new UpdateUserSubscriptionCommand(
+                    userId,
+                    status,
+                    resource.subscriptionExpiry()
+            );
+            user = userCommandService.handle(updateSubscriptionCommand);
+        }
+        
+        var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
+        return ResponseEntity.ok(userResource);
+    }
+
+    /**
+     * Deletes a user
+     *
+     * @param userId the user id
+     * @return no content
+     */
+    @Operation(summary = "Delete user", description = "Permanently deletes a user account")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "User deleted successfully"),
+        @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @DeleteMapping(value = "/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
+        var deleteUserCommand = new DeleteUserCommand(userId);
+        userCommandService.handle(deleteUserCommand);
+        return ResponseEntity.noContent().build();
     }
 }

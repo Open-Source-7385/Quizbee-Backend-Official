@@ -1,8 +1,8 @@
 package pe.edu.upc.quizbee.iam.infrastructure.hashing.bcrypt.services;
 
+import pe.edu.upc.quizbee.iam.infrastructure.hashing.bcrypt.BCryptHashingService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import pe.edu.upc.quizbee.iam.infrastructure.hashing.bcrypt.BCryptHashingService;
 
 /**
  * This class implements the {@link BCryptHashingService} interface.

@@ -1,5 +1,8 @@
 package pe.edu.upc.quizbee.iam.infrastructure.authorization.sfs.configuration;
 
+import pe.edu.upc.quizbee.iam.infrastructure.authorization.sfs.pipeline.BearerAuthorizationRequestFilter;
+import pe.edu.upc.quizbee.iam.infrastructure.hashing.bcrypt.BCryptHashingService;
+import pe.edu.upc.quizbee.iam.infrastructure.tokens.jwt.BearerTokenService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,9 +18,6 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import pe.edu.upc.quizbee.iam.infrastructure.authorization.sfs.pipeline.BearerAuthorizationRequestFilter;
-import pe.edu.upc.quizbee.iam.infrastructure.hashing.bcrypt.BCryptHashingService;
-import pe.edu.upc.quizbee.iam.infrastructure.tokens.jwt.BearerTokenService;
 
 import java.util.List;
 
@@ -66,9 +66,8 @@ public class WebSecurityConfiguration {
      */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        var authenticationProvider = new DaoAuthenticationProvider();
+        var authenticationProvider = new DaoAuthenticationProvider(hashingService);
         authenticationProvider.setUserDetailsService(userDetailsService);
-        authenticationProvider.setPasswordEncoder(hashingService);
         return authenticationProvider;
     }
 
@@ -88,8 +87,6 @@ public class WebSecurityConfiguration {
      * @param http The http security
      * @return The security filter chain
      */
-
-   /** es para que no pida authentification
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(corsConfigurer -> corsConfigurer.configurationSource( request -> {
@@ -114,23 +111,6 @@ public class WebSecurityConfiguration {
         return http.build();
     }
 
-     */
-
-   @Bean
-   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-       http.cors(corsConfigurer -> corsConfigurer.configurationSource( request -> {
-           var cors = new CorsConfiguration();
-           cors.setAllowedOrigins(List.of("*"));
-           cors.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
-           cors.setAllowedHeaders(List.of("*"));
-           return cors;
-       } ));
-       http.csrf(csrfConfigurer -> csrfConfigurer.disable())
-               .authorizeHttpRequests(authorizeRequests ->
-                       authorizeRequests.anyRequest().permitAll()  // ⚠️ PERMITE TODO
-               );
-       return http.build();
-   }
     /**
      * This is the constructor of the class.
      * @param userDetailsService The user details service
@@ -138,9 +118,6 @@ public class WebSecurityConfiguration {
      * @param hashingService The hashing service
      * @param authenticationEntryPoint The authentication entry point
      */
-
-
-
     public WebSecurityConfiguration(
             @Qualifier("defaultUserDetailsService") UserDetailsService userDetailsService,
             BearerTokenService tokenService, BCryptHashingService hashingService,

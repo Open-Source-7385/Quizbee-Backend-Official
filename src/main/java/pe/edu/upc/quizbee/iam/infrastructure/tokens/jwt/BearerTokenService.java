@@ -1,9 +1,9 @@
 package pe.edu.upc.quizbee.iam.infrastructure.tokens.jwt;
 
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.security.core.Authentication;
 import pe.edu.upc.quizbee.iam.application.internal.outboundservices.tokens.TokenService;
 import pe.edu.upc.quizbee.iam.infrastructure.tokens.jwt.services.TokenServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.Authentication;
 
 /**
  * This interface is a marker interface for the JWT token service.

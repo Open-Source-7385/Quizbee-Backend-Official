@@ -1,9 +1,9 @@
 package pe.edu.upc.quizbee.iam.infrastructure.persistence.jpa.repositories;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import pe.edu.upc.quizbee.iam.domain.model.entities.Role;
 import pe.edu.upc.quizbee.iam.domain.model.valueobjects.Roles;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 

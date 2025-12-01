@@ -1,5 +1,7 @@
 package pe.edu.upc.quizbee.iam.infrastructure.authorization.sfs.pipeline;
 
+import pe.edu.upc.quizbee.iam.infrastructure.authorization.sfs.model.UsernamePasswordAuthenticationTokenBuilder;
+import pe.edu.upc.quizbee.iam.infrastructure.tokens.jwt.BearerTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,8 +13,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.filter.OncePerRequestFilter;
-import pe.edu.upc.quizbee.iam.infrastructure.authorization.sfs.model.UsernamePasswordAuthenticationTokenBuilder;
-import pe.edu.upc.quizbee.iam.infrastructure.tokens.jwt.BearerTokenService;
 
 import java.io.IOException;
 
