@@ -25,4 +25,4 @@ COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8090
 
 # Comando para ejecutar la aplicación
-ENTRYPOINT ["java", "-Dserver.port=${PORT}", "-jar", "app.jar"]
+CMD java -Dserver.port=$PORT -jar app.jar
